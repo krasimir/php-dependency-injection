@@ -1,7 +1,5 @@
 <?php
 
-    require_once("../src/DI.php");
-    
     class View {
         public function show($str) {
             echo "<p>".$str."</p>";
@@ -17,10 +15,11 @@
         }
     }
     
-    /**
-    * @Inject view
-    */
     class Navigation {
+        private $view;
+        public function __construct() {
+            $this->view = new View();
+        }
         public function show() {
             $this->view->show('
                 <a href="#" title="Home">Home</a> | 
@@ -30,44 +29,37 @@
         }
     }
     
-    /**
-    * @Inject usersModel
-    * @Inject view
-    */
     class Content {
+    
         private $title;
+        private $view;
+        private $usersModel;
+        
         public function __construct($title) {
             $this->title = $title;
+            $this->view = new View();
+            $this->usersModel = new UsersModel();
         }
         public function show() {  
-            $this->users = $this->usersModel->get();
+            $users = $this->usersModel->get();
             $this->view->show($this->title);
-            foreach($this->users as $user) {
+            foreach($users as $user) {
                 $this->view->show($user->firstName." ".$user->lastName);
             }
         }
     }
     
-    /**
-    * @Inject navigation
-    * @Inject content
-    */
     class PageController {
         public function show() {
-            $this->navigation->show();
-            $this->content->show();
+            $navigation = new Navigation();
+            $content = new Content("Content title!");
+            $navigation->show();
+            $content->show();
         }
     }
     
-    // mapping
-    DI::mapClass("navigation", "Navigation");
-    DI::mapClass("content", "Content", array("Content title!"));
-    DI::mapClass("view", "View");
-    DI::mapClassAsSingleton("usersModel", "UsersModel");
-    
-    // showing content
-    $page = DI::getInstanceOf("PageController");
+    $page = new PageController();
     $page->show();
-    
+
 
 ?>

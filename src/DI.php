@@ -40,11 +40,11 @@
                                         $obj->$key = self::$map->$key->value;
                                     break;
                                     case "class":
-                                        $obj->$key = self::getInstanceOf(self::$map->$key->value);
+                                        $obj->$key = self::getInstanceOf(self::$map->$key->value, self::$map->$key->arguments);
                                     break;
                                     case "classSingleton":
                                         if(self::$map->$key->instance === null) {
-                                            $obj->$key = self::$map->$key->instance = self::getInstanceOf(self::$map->$key->value);
+                                            $obj->$key = self::$map->$key->instance = self::getInstanceOf(self::$map->$key->value, self::$map->$key->arguments);
                                         } else {
                                             $obj->$key = self::$map->$key->instance;
                                         }
@@ -61,32 +61,31 @@
             
         }
         public static function mapValue($key, $value) {
-            if(self::$map === null) {
-                self::$map = (object) array();
-            }
-            self::$map->$key = (object) array(
+            self::addToMap($key, (object) array(
                 "value" => $value,
                 "type" => "value"
-            );
+            ));
         }
-        public static function mapClass($key, $value) {
-            if(self::$map === null) {
-                self::$map = (object) array();
-            }
-            self::$map->$key = (object) array(
+        public static function mapClass($key, $value, $arguments = null) {
+            self::addToMap($key, (object) array(
                 "value" => $value,
-                "type" => "class"
-            );
+                "type" => "class",
+                "arguments" => $arguments
+            ));
         }
-        public static function mapClassAsSingleton($key, $value) {
-            if(self::$map === null) {
-                self::$map = (object) array();
-            }
-            self::$map->$key = (object) array(
+        public static function mapClassAsSingleton($key, $value, $arguments = null) {
+            self::addToMap($key, (object) array(
                 "value" => $value,
                 "type" => "classSingleton",
-                "instance" => null
-            );
+                "instance" => null,
+                "arguments" => $arguments
+            ));
+        }
+        private static function addToMap($key, $obj) {
+            if(self::$map === null) {
+                self::$map = (object) array();
+            }
+            self::$map->$key = $obj;
         }
     
     }
